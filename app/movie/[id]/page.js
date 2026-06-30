@@ -135,8 +135,11 @@ export default function MoviePage() {
                         <Carousel className="w-full">
                             <CarouselContent className="-ml-3">
                                 {cast.map((person) => (
-                                    <Link href={`/person/${person.id}`} key={person.id}>
-                                        <CarouselItem className="pl-3 basis-1/4 sm:basis-1/6 md:basis-[12%]">
+                                    <CarouselItem
+                                        key={person.id}
+                                        className="pl-3 basis-1/4 sm:basis-1/6 md:basis-[12%] p-1"
+                                    >
+                                        <Link href={`/person/${person.id}`}>
                                             <div className="flex flex-col items-center gap-2 group">
                                                 <div className="w-16 h-16 rounded-full overflow-hidden bg-[#1f1f1f] shrink-0 ring-2 ring-transparent group-hover:ring-amber-400 transition-all">
                                                     {person.profile_path ? (
@@ -160,8 +163,8 @@ export default function MoviePage() {
                                                     {person.character}
                                                 </p>
                                             </div>
-                                        </CarouselItem>
-                                    </Link>
+                                        </Link>
+                                    </CarouselItem>
                                 ))}
                             </CarouselContent>
                             <CarouselPrevious className="left-2 bg-black hover:text-yellow-400" />

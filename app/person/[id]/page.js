@@ -22,6 +22,7 @@ export default function PersonPage() {
     const [person, setPerson] = useState(null);
     const [credits, setCredits] = useState([]);
     const [images, setImages] = useState([]);
+    const [showAllFilmography, setShowAllFilmography] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -67,10 +68,9 @@ export default function PersonPage() {
     return (
         <div className="bg-[#0a0a0a] min-h-screen text-white">
             <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col gap-14">
-
                 <div className="flex flex-col md:flex-row gap-10">
                     {person.profile_path && (
-                        <div className="shrink-0 w-full max-w-[200px] md:w-[280px] rounded-xl overflow-hidden">
+                        <div className="shrink-0 w-full max-w-[200px] md:w-[350px] rounded-xl overflow-hidden">
                             <Image
                                 src={`${IMG}${person.profile_path}`}
                                 alt={person.name}
@@ -134,7 +134,7 @@ export default function PersonPage() {
                         </div>
 
                         {person.biography && (
-                            <p className="text-gray-300 text-sm leading-relaxed max-w-2xl">
+                            <p className="text-gray-300 text-sm leading-relaxed max-w-4xl">
                                 {person.biography}
                             </p>
                         )}
@@ -166,44 +166,52 @@ export default function PersonPage() {
                     )
                 }
 
-                {
-                    filmography.length > 0 && (
-                        <section>
-                            <h2 className="text-xl font-bold mb-4">Filmography</h2>
-                            <div className="border border-white/10 rounded-xl overflow-hidden">
-                                {filmography.map((item, i) => {
-                                    const year = (item.release_date || item.first_air_date)?.slice(0, 4);
-                                    const isTV = item.media_type === "tv";
-                                    return (
-                                        <Link href={`/movie/${item.id}`}
-                                            key={`${item.id}-${item.credit_id}`}
-                                            className={`flex items-center justify-between px-5 py-3 text-sm ${i !== 0 ? "border-t border-white/5" : ""} hover:bg-white/5 transition`}
-                                        >
-                                            <div className="flex items-center gap-6">
-                                                <span className="text-gray-500 w-10 shrink-0">{year || "—"}</span>
-                                                <span className="text-white font-medium">{item.title || item.name}</span>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                {item.character && (
-                                                    <span className="text-gray-500 hidden sm:block">{item.character}</span>
-                                                )}
-                                                {item.vote_average > 0 && (
-                                                    <span className="flex items-center gap-1 text-yellow-400 text-xs font-semibold">
-                                                        <StarIcon size={12} className="fill-yellow-400" />
-                                                        {item.vote_average.toFixed(1)}
-                                                    </span>
-                                                )}
-                                                <span className={`text-xs font-bold px-2 py-0.5 rounded ${isTV ? "bg-blue-600" : "bg-red-600"}`}>
-                                                    {isTV ? "TV" : "Film"}
+                {filmography.length > 0 && (
+                    <section>
+                        <h2 className="text-xl font-bold mb-4">Filmography</h2>
+                        <div className="border border-white/10 rounded-xl overflow-hidden">
+                            {(showAllFilmography ? filmography : filmography.slice(0, 10)).map((item, i) => {
+                                const year = (item.release_date || item.first_air_date)?.slice(0, 4);
+                                const isTV = item.media_type === "tv";
+                                return (
+                                    <Link
+                                        href={`/movie/${item.id}`}
+                                        key={`${item.id}-${item.credit_id}`}
+                                        className={`flex items-center justify-between px-5 py-3 text-sm ${i !== 0 ? "border-t border-white/5" : ""} hover:bg-white/5 transition`}
+                                    >
+                                        <div className="flex items-center gap-6">
+                                            <span className="text-gray-500 w-10 shrink-0">{year || "—"}</span>
+                                            <span className="text-white font-medium">{item.title || item.name}</span>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            {item.character && (
+                                                <span className="text-gray-500 hidden sm:block">{item.character}</span>
+                                            )}
+                                            {item.vote_average > 0 && (
+                                                <span className="flex items-center gap-1 text-yellow-400 text-xs font-semibold">
+                                                    <StarIcon size={12} className="fill-yellow-400" />
+                                                    {item.vote_average.toFixed(1)}
                                                 </span>
-                                            </div>
-                                        </Link>
-                                    );
-                                })}
-                            </div>
-                        </section>
-                    )
-                }
+                                            )}
+                                            <span className={`text-xs font-bold px-2 py-0.5 rounded ${isTV ? "bg-blue-600" : "bg-red-600"}`}>
+                                                {isTV ? "TV" : "Film"}
+                                            </span>
+                                        </div>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+
+                        {filmography.length > 10 && (
+                            <button
+                                onClick={() => setShowAllFilmography((prev) => !prev)}
+                                className="mt-3 text-yellow-400 text-sm hover:underline"
+                            >
+                                {showAllFilmography ? "Show less" : `Show all ${filmography.length} credits`}
+                            </button>
+                        )}
+                    </section>
+                )}
 
                 {images.length > 0 && (
                     <section>
@@ -224,8 +232,8 @@ export default function PersonPage() {
                                     </CarouselItem>
                                 ))}
                             </CarouselContent>
-                            <CarouselPrevious className="hidden sm:block left-2 bg-black hover:text-yellow-400" />
-                            <CarouselNext className="hidden sm:block right-2 bg-black hover:text-yellow-400" />
+                            <CarouselPrevious className="hidden sm:flex left-2 bg-black hover:text-yellow-400 text-center" />
+                            <CarouselNext className="hidden sm:flex right-2 bg-black hover:text-yellow-400" />
                         </Carousel>
                     </section>
                 )}

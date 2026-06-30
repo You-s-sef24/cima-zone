@@ -5,7 +5,7 @@ import Link from "next/link";
 export default function MovieCard({ id, title, img, rating, date, rank }) {
   return (
     <Link href={`/movie/${id}`}>
-      <div className="w-full flex flex-col gap-2 cursor-pointer group">
+      <div className="w-full flex flex-col gap-2 cursor-pointer group hover:scale-105 transition-all">
         <div className="relative rounded-xl overflow-hidden aspect-[2/3]">
           <Image
             src={`https://image.tmdb.org/t/p/w500${img}`}
@@ -33,7 +33,8 @@ export default function MovieCard({ id, title, img, rating, date, rank }) {
           </p>
           <div className="flex items-center gap-2 text-sm">
             <span className="flex items-center gap-1 text-yellow-400">
-              <StarIcon className="fill-amber-400" size={15} /> {rating}
+              <StarIcon className="fill-amber-400" size={15} />{" "}
+              {rating.toFixed(1)}
             </span>
             <span className="text-gray-400">{date}</span>
           </div>

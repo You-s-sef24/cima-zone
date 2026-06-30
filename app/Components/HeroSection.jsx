@@ -56,11 +56,12 @@ export default function HeroSection() {
           {movie.overview}
         </p>
 
-        <Link href={`/movie/${movie.id}`}>
-          <button className="flex items-center gap-2 bg-red-600 hover:bg-red-700 transition-colors text-white font-semibold px-6 py-3 rounded-full cursor-pointer">
-            <PlayIcon size={16} className="fill-white" />
-            View Details
-          </button>
+        <Link
+          href={`/movie/${movie.id}`}
+          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 transition-colors text-white font-semibold px-6 py-3 rounded-full cursor-pointer w-45"
+        >
+          <PlayIcon size={16} className="fill-white" />
+          View Details
         </Link>
       </div>
     </section>

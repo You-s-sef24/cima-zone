@@ -20,7 +20,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 left-0 right-0 z-50 bg-[#0a0a0a] border-b border-white/5">
+    <nav className="sticky top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <div className="w-8 h-8 bg-[#E50914] rounded-lg flex items-center justify-center">
@@ -56,7 +56,7 @@ export default function Navbar() {
       </div>
 
       {searchOpen && (
-        <div className="md:hidden px-4 pb-3 bg-[#0a0a0a]">
+        <div className="md:hidden px-4 pb-3 bg-[#0a0a0a]/80 backdrop-blur-md">
           <form
             onSubmit={handleSearch}
             className="flex items-center gap-2 bg-[#1a1a1a] border border-[#F5C518] rounded-full px-4 py-2"

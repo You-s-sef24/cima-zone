@@ -11,14 +11,17 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { NowPlayingSkeleton } from "./loaders/HomePageSkeleton";
 
 const TMDB_TOKEN =
   "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5MGJiODdmODViNDZhN2VlN2U0ZTdmNGM5MDE0OGQwYyIsIm5iZiI6MTc1NTI2MDc4Mi4yODcwMDAyLCJzdWIiOiI2ODlmMjc2ZWJmYWIyZDdlNTg1ZDJhNjAiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.7c5eqGuW7C4e_JyHrcia32Y5Zbrut9aJhLzksC8NEZA";
 
 export default function NowPlayingSection() {
+  const [loading, setLoading] = useState(true);
   const [movies, setMovies] = useState([]);
 
   useEffect(() => {
+    setLoading(true);
     axios
       .get("https://api.themoviedb.org/3/movie/now_playing", {
         headers: {
@@ -30,8 +33,15 @@ export default function NowPlayingSection() {
       })
       .catch((e) => {
         console.log(e);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, []);
+
+  if (loading) {
+    return <NowPlayingSkeleton />;
+  }
 
   return (
     <section className="mb-12">

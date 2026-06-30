@@ -5,23 +5,31 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { PlayIcon, StarIcon } from "lucide-react";
 import Link from "next/link";
+import { HeroSkeleton } from "./loaders/HomePageSkeleton";
 
 const TMDB_TOKEN =
   "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5MGJiODdmODViNDZhN2VlN2U0ZTdmNGM5MDE0OGQwYyIsIm5iZiI6MTc1NTI2MDc4Mi4yODcwMDAyLCJzdWIiOiI2ODlmMjc2ZWJmYWIyZDdlNTg1ZDJhNjAiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.7c5eqGuW7C4e_JyHrcia32Y5Zbrut9aJhLzksC8NEZA";
 
 export default function HeroSection() {
+  const [loading, setLoading] = useState(true);
   const [movie, setMovie] = useState(null);
 
   useEffect(() => {
+    setLoading(true);
     axios
       .get("https://api.themoviedb.org/3/trending/movie/week", {
         headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
       })
       .then((res) => setMovie(res.data.results[0]))
-      .catch((e) => console.log(e));
+      .catch((e) => console.log(e))
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
-  if (!movie) return null;
+  if (loading) {
+    return <HeroSkeleton />;
+  }
 
   const year = movie.release_date?.slice(0, 4);
   const backdrop = `https://image.tmdb.org/t/p/original${movie.backdrop_path}`;

@@ -1,11 +1,41 @@
-import { PlayIcon, StarIcon } from "lucide-react";
+import { PlayIcon, StarIcon, Heart, Bookmark } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useFavStore } from "../store/FavStore";
+import { useWatchLaterStore } from "../store/WatchLaterStore";
 
 export default function MovieCard({ id, title, img, rating, date, rank }) {
+  const toggleFav = useFavStore((state) => state.toggleFav);
+  const isFav = useFavStore((state) => state.isFav(id));
+
+  const toggleWatchLater = useWatchLaterStore(
+    (state) => state.toggleWatchLater,
+  );
+  const isWatchLater = useWatchLaterStore((state) => state.isWatchLater(id));
+
+  const movie = {
+    id,
+    title,
+    poster_path: img,
+    vote_average: rating,
+    release_date: date,
+  };
+
+  const handleFavClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleFav(movie);
+  };
+
+  const handleWatchLaterClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWatchLater(movie);
+  };
+
   return (
-    <Link href={`/movie/${id}`}>
-      <div className="w-full flex flex-col gap-2 cursor-pointer group hover:scale-105 transition-all">
+    <div className="w-full flex flex-col gap-2 cursor-pointer group relative hover:scale-105 transition-all">
+      <Link href={`/movie/${id}`}>
         <div className="relative rounded-xl overflow-hidden aspect-[2/3]">
           <Image
             src={`https://image.tmdb.org/t/p/w500${img}`}
@@ -27,7 +57,7 @@ export default function MovieCard({ id, title, img, rating, date, rank }) {
           </div>
         </div>
 
-        <div className="flex flex-col gap-0.5 px-0.5">
+        <div className="flex flex-col gap-0.5 px-0.5 mt-2">
           <p className="text-white font-semibold text-sm leading-tight">
             {title}
           </p>
@@ -39,7 +69,31 @@ export default function MovieCard({ id, title, img, rating, date, rank }) {
             <span className="text-gray-400">{date}</span>
           </div>
         </div>
+      </Link>
+
+      <div className="absolute top-2 right-2 z-10 flex gap-1.5">
+        <button
+          onClick={handleWatchLaterClick}
+          className="bg-black/60 p-1.5 rounded-full hover:bg-black/80 transition"
+        >
+          <Bookmark
+            size={16}
+            className={
+              isWatchLater ? "fill-yellow-400 text-yellow-400" : "text-white"
+            }
+          />
+        </button>
+
+        <button
+          onClick={handleFavClick}
+          className="bg-black/60 p-1.5 rounded-full hover:bg-black/80 transition"
+        >
+          <Heart
+            size={16}
+            className={isFav ? "fill-red-500 text-red-500" : "text-white"}
+          />
+        </button>
       </div>
-    </Link>
+    </div>
   );
 }

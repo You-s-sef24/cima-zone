@@ -255,6 +255,7 @@ export default function MoviePage() {
                             {similar.map((m, i) => (
                                 <MovieCard
                                     key={m.id}
+                                    id={m.id}
                                     title={m.title}
                                     img={m.poster_path}
                                     rating={m.vote_average}

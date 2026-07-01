@@ -44,16 +44,16 @@ export default function UpcomingSection() {
   }
 
   return (
-    <section className="pb-12">
+    <section className="mb-12">
       <h3 className="flex items-center font-bold gap-2">
         <span className="text-red-600">
           <Calendar1Icon />
         </span>
         Upcoming
       </h3>
-      <div className="relative px-0 my-4">
+      <div className="relative my-4">
         <Carousel className="w-full">
-          <CarouselContent className="-ml-2">
+          <CarouselContent className="-ml-2 p-3">
             {movies.map((movie) => (
               <CarouselItem
                 key={movie.id}

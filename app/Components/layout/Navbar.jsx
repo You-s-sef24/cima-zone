@@ -3,12 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, X, Film } from "lucide-react";
+import { Search, X, Film, Bookmark, Heart } from "lucide-react";
+import { useFavStore } from "@/app/store/FavStore";
+import { useWatchLaterStore } from "@/app/store/WatchLaterStore";
 
 export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const router = useRouter();
+
+  const fav = useFavStore((state) => state.fav);
+  const watchLater = useWatchLaterStore((state) => state.watchLater);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -31,20 +36,44 @@ export default function Navbar() {
           </span>
         </Link>
 
+        <form
+          onSubmit={handleSearch}
+          className="hidden md:flex items-center gap-2 bg-[#1a1a1a] border border-white/10 rounded-full px-4 py-1.5 w-56 focus-within:border-[#F5C518] transition-colors"
+        >
+          <Search size={14} className="text-[#9E9E9E] shrink-0" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search..."
+            className="bg-transparent text-sm text-white placeholder:text-[#9E9E9E] outline-none w-full"
+          />
+        </form>
+
         <div className="flex items-center gap-3 ml-auto">
-          <form
-            onSubmit={handleSearch}
-            className="hidden md:flex items-center gap-2 bg-[#1a1a1a] border border-white/10 rounded-full px-4 py-1.5 w-56 focus-within:border-[#F5C518] transition-colors"
+          <Link
+            href="/watch-later"
+            className="relative text-[#9E9E9E] hover:text-white transition-colors"
           >
-            <Search size={14} className="text-[#9E9E9E] shrink-0" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search..."
-              className="bg-transparent text-sm text-white placeholder:text-[#9E9E9E] outline-none w-full"
-            />
-          </form>
+            <Bookmark size={20} />
+            {watchLater.length > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-[#F5C518] text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                {watchLater.length}
+              </span>
+            )}
+          </Link>
+
+          <Link
+            href="/favorites"
+            className="relative text-[#9E9E9E] hover:text-white transition-colors"
+          >
+            <Heart size={20} />
+            {fav.length > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-[#E50914] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                {fav.length}
+              </span>
+            )}
+          </Link>
 
           <button
             onClick={() => setSearchOpen(!searchOpen)}

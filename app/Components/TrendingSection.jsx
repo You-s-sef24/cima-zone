@@ -53,7 +53,7 @@ export default function TrendingSection() {
       </h3>
       <div className="relative px-0 my-4">
         <Carousel className="w-full">
-          <CarouselContent className="-ml-2">
+          <CarouselContent className="-ml-2 p-3">
             {movies.map((movie) => (
               <CarouselItem
                 key={movie.id}

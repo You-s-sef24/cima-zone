@@ -11,38 +11,44 @@ import {
 import MovieCard from "@/app/Components/MovieCard";
 import PersonPageSkeleton from "@/app/Components/loaders/PersonPageSkeleton";
 import Link from "next/link";
-
-const TMDB_TOKEN =
-    "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5MGJiODdmODViNDZhN2VlN2U0ZTdmNGM5MDE0OGQwYyIsIm5iZiI6MTc1NTI2MDc4Mi4yODcwMDAyLCJzdWIiOiI2ODlmMjc2ZWJmYWIyZDdlNTg1ZDJhNjAiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.7c5eqGuW7C4e_JyHrcia32Y5Zbrut9aJhLzksC8NEZA";
+import { useQuery } from "@tanstack/react-query";
 
 const IMG = "https://image.tmdb.org/t/p/w500";
 
 export default function PersonPage() {
     const { id } = useParams();
-    const [person, setPerson] = useState(null);
-    const [credits, setCredits] = useState([]);
-    const [images, setImages] = useState([]);
     const [showAllFilmography, setShowAllFilmography] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const { data: person, isLoading } = useQuery({
+        queryKey: ["person", id],
+        queryFn: async () => {
+            const res = await axios.get(`https://api.themoviedb.org/3/person/${id}`, {
+                headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_TOKEN}` },
+            });
+            return res.data;
+        }
+    })
 
-    useEffect(() => {
-        const headers = { Authorization: `Bearer ${TMDB_TOKEN}` };
+    const { data: credits } = useQuery({
+        queryKey: ["credits", id],
+        queryFn: async () => {
+            const res = await axios.get(`https://api.themoviedb.org/3/person/${id}/combined_credits`, {
+                headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_TOKEN}` },
+            });
+            return res.data.cast;
+        }
+    })
 
-        Promise.all([
-            axios.get(`https://api.themoviedb.org/3/person/${id}`, { headers }),
-            axios.get(`https://api.themoviedb.org/3/person/${id}/combined_credits`, { headers }),
-            axios.get(`https://api.themoviedb.org/3/person/${id}/images`, { headers }),
-        ])
-            .then(([personRes, creditsRes, imagesRes]) => {
-                setPerson(personRes.data);
-                setCredits(creditsRes.data.cast || []);
-                setImages(imagesRes.data.profiles?.slice(0, 8) || []);
-            })
-            .catch((e) => console.log(e))
-            .finally(() => setLoading(false));
-    }, [id]);
+    const { data: images } = useQuery({
+        queryKey: ["images", id],
+        queryFn: async () => {
+            const res = await axios.get(`https://api.themoviedb.org/3/person/${id}/images`, {
+                headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_TOKEN}` },
+            });
+            return res.data.profiles?.slice(0, 8) || [];
+        }
+    })
 
-    if (loading) {
+    if (isLoading) {
         return <PersonPageSkeleton />
     }
 

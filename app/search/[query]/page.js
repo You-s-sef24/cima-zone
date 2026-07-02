@@ -1,52 +1,51 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 import Image from "next/image";
 import { SearchXIcon } from "lucide-react";
 import MovieCard from "@/app/Components/MovieCard";
 import SearchPageSkeleton from "@/app/Components/loaders/SearchPageSkeleton";
-
-const TMDB_TOKEN =
-    "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5MGJiODdmODViNDZhN2VlN2U0ZTdmNGM5MDE0OGQwYyIsIm5iZiI6MTc1NTI2MDc4Mi4yODcwMDAyLCJzdWIiOiI2ODlmMjc2ZWJmYWIyZDdlNTg1ZDJhNjAiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.7c5eqGuW7C4e_JyHrcia32Y5Zbrut9aJhLzksC8NEZA";
+import { useQuery } from "@tanstack/react-query";
 
 const IMG = "https://image.tmdb.org/t/p/w185";
 
 export default function SearchPage() {
     const { query } = useParams();
-    const [movies, setMovies] = useState([]);
-    const [people, setPeople] = useState([]);
-    const [loading, setLoading] = useState(true);
-
     const decodedQuery = decodeURIComponent(query || "");
 
-    useEffect(() => {
-        if (!decodedQuery) return;
-        setLoading(true);
+    const { data: movies, isLoading } = useQuery({
+        queryKey: ["movies", decodedQuery],
+        queryFn: async () => {
+            const res = await axios.get(`https://api.themoviedb.org/3/search/movie`, {
+                headers: {
+                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_TOKEN}`
+                },
+                params: {
+                    query: decodedQuery
+                },
+            });
+            return res.data.results;
+        }
+    })
 
-        const headers = { Authorization: `Bearer ${TMDB_TOKEN}` };
+    const { data: people } = useQuery({
+        queryKey: ["people", decodedQuery],
+        queryFn: async () => {
+            const res = await axios.get(`https://api.themoviedb.org/3/search/person`, {
+                headers: {
+                    Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_TOKEN}`
+                },
+                params: {
+                    query: decodedQuery
+                }
+            });
+            return res.data.results.slice(0, 6);
+        }
+    })
 
-        Promise.all([
-            axios.get("https://api.themoviedb.org/3/search/movie", {
-                headers,
-                params: { query: decodedQuery },
-            }),
-            axios.get("https://api.themoviedb.org/3/search/person", {
-                headers,
-                params: { query: decodedQuery },
-            }),
-        ])
-            .then(([movieRes, personRes]) => {
-                setMovies(movieRes.data.results || []);
-                setPeople(personRes.data.results?.slice(0, 6) || []);
-            })
-            .catch((e) => console.log(e))
-            .finally(() => setLoading(false));
-    }, [decodedQuery]);
-
-    if (loading) {
+    if (isLoading) {
         return <SearchPageSkeleton />;
     }
 

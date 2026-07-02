@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import axios from "axios";
 import { StarIcon, ClockIcon, CalendarIcon, PlayIcon } from "lucide-react";
@@ -9,45 +9,65 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import MovieCard from "@/app/Components/MovieCard";
 import MoviePageSkeleton from "@/app/Components/loaders/MoviePageSkeleton";
 import Link from "next/link";
-
-const TMDB_TOKEN =
-    "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5MGJiODdmODViNDZhN2VlN2U0ZTdmNGM5MDE0OGQwYyIsIm5iZiI6MTc1NTI2MDc4Mi4yODcwMDAyLCJzdWIiOiI2ODlmMjc2ZWJmYWIyZDdlNTg1ZDJhNjAiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.7c5eqGuW7C4e_JyHrcia32Y5Zbrut9aJhLzksC8NEZA";
+import { useQuery } from "@tanstack/react-query";
 
 const IMG = "https://image.tmdb.org/t/p/w500";
 const IMG_ORIGINAL = "https://image.tmdb.org/t/p/original";
 
 export default function MoviePage() {
     const { id } = useParams();
-    const [movie, setMovie] = useState(null);
-    const [cast, setCast] = useState([]);
-    const [videos, setVideos] = useState([]);
-    const [reviews, setReviews] = useState([]);
-    const [similar, setSimilar] = useState([]);
     const [expanded, setExpanded] = useState({});
-    const [loading, setLoading] = useState(true);
+    const { data: movie, isLoading } = useQuery({
+        queryKey: ["movie", id],
+        queryFn: async () => {
+            const res = await axios.get(`https://api.themoviedb.org/3/movie/${id}`, {
+                headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_TOKEN}` },
+            });
+            return res.data;
+        }
+    });
 
-    useEffect(() => {
-        const headers = { Authorization: `Bearer ${TMDB_TOKEN}` };
+    const { data: similar } = useQuery({
+        queryKey: ["similar-movies", id],
+        queryFn: async () => {
+            const res = await axios.get(`https://api.themoviedb.org/3/movie/${id}/similar`, {
+                headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_TOKEN}` },
+            });
+            return res.data.results.slice(0, 10);
+        }
+    });
 
-        Promise.all([
-            axios.get(`https://api.themoviedb.org/3/movie/${id}`, { headers }),
-            axios.get(`https://api.themoviedb.org/3/movie/${id}/credits`, { headers }),
-            axios.get(`https://api.themoviedb.org/3/movie/${id}/videos`, { headers }),
-            axios.get(`https://api.themoviedb.org/3/movie/${id}/reviews`, { headers }),
-            axios.get(`https://api.themoviedb.org/3/movie/${id}/similar`, { headers }),
-        ])
-            .then(([movieRes, creditsRes, videosRes, reviewsRes, similarRes]) => {
-                setMovie(movieRes.data);
-                setCast(creditsRes.data.cast.slice(0, 10));
-                setVideos(videosRes.data.results.filter((v) => v.site === "YouTube").slice(0, 3));
-                setReviews(reviewsRes.data.results.slice(0, 5));
-                setSimilar(similarRes.data.results.slice(0, 10));
-            })
-            .catch((e) => console.log(e))
-            .finally(() => setLoading(false));
-    }, [id]);
+    const { data: videos } = useQuery({
+        queryKey: ["videos", id],
+        queryFn: async () => {
+            const res = await axios.get(`https://api.themoviedb.org/3/movie/${id}/videos`, {
+                headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_TOKEN}` },
+            });
+            return res.data.results.filter((v) => v.site === "YouTube").slice(0, 3);
+        }
+    });
 
-    if (loading) return <MoviePageSkeleton />;
+    const { data: cast } = useQuery({
+        queryKey: ["cast", id],
+        queryFn: async () => {
+            const res = await axios.get(`https://api.themoviedb.org/3/movie/${id}/credits`, {
+                headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_TOKEN}` },
+            });
+            return res.data.cast.slice(0, 10);
+        }
+    });
+
+    const { data: reviews } = useQuery({
+        queryKey: ["reviews", id],
+        queryFn: async () => {
+            const res = await axios.get(`https://api.themoviedb.org/3/movie/${id}/reviews`, {
+                headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_TMDB_TOKEN}` },
+            });
+            return res.data.results.slice(0, 5);
+        }
+    });
+
+    if (isLoading) return <MoviePageSkeleton />;
 
     const year = movie.release_date?.slice(0, 4);
     const runtime = movie.runtime
@@ -129,7 +149,7 @@ export default function MoviePage() {
 
             <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col gap-14">
 
-                {cast.length > 0 && (
+                {cast?.length > 0 && (
                     <section>
                         <h2 className="text-xl font-bold mb-6">Cast</h2>
                         <Carousel className="w-full">
@@ -173,7 +193,7 @@ export default function MoviePage() {
                     </section>
                 )}
 
-                {videos.length > 0 && (
+                {videos?.length > 0 && (
                     <section>
                         <h2 className="text-xl font-bold mb-6">Trailers & Videos</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -205,7 +225,7 @@ export default function MoviePage() {
                     </section>
                 )}
 
-                {reviews.length > 0 && (
+                {reviews?.length > 0 && (
                     <section>
                         <h2 className="text-xl font-bold mb-6">Reviews</h2>
                         <div className="flex flex-col gap-4">
@@ -248,11 +268,11 @@ export default function MoviePage() {
                     </section>
                 )}
 
-                {similar.length > 0 && (
+                {similar?.length > 0 && (
                     <section>
                         <h2 className="text-xl font-bold mb-6">Similar Movies</h2>
                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
-                            {similar.map((m, i) => (
+                            {similar?.map((m, i) => (
                                 <MovieCard
                                     key={m.id}
                                     id={m.id}
